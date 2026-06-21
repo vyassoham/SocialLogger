@@ -648,22 +648,39 @@ with tab_channels:
         st.markdown("""
         <div class="glass-card">
             <h4>Link New Social Channel</h4>
-            <p style="color: #94a3b8; font-size: 0.9rem;">Link handles using mock credentials to verify schedulers and visual components.</p>
+            <p style="color: #94a3b8; font-size: 0.9rem;">Input real API credentials to authenticate live APIs.</p>
         </div>
         """, unsafe_allow_html=True)
         
         new_plat = st.selectbox("Platform", ["Twitter", "LinkedIn", "Instagram"])
         new_handle = st.text_input("Channel Handle / Username", placeholder="@yourhandle")
-        new_tok = st.text_input("OAuth Access Token", value="mock_access_token_token", type="password")
+        
+        creds = {}
+        if new_plat == "Twitter":
+            st.info("Requires Twitter OAuth 1.0a User Context Keys")
+            creds["api_key"] = st.text_input("API Key (Consumer Key)", type="password")
+            creds["api_secret"] = st.text_input("API Secret (Consumer Secret)", type="password")
+            creds["access_token"] = st.text_input("Access Token", type="password")
+            creds["access_secret"] = st.text_input("Access Token Secret", type="password")
+        elif new_plat == "LinkedIn":
+            st.info("Requires LinkedIn v2 Bearer Token and Person URN")
+            creds["access_token"] = st.text_input("Access Token (Bearer)", type="password")
+            creds["person_urn"] = st.text_input("Person URN", placeholder="urn:li:person:12345")
+        elif new_plat == "Instagram":
+            st.info("Requires Meta Graph API Token and IG User ID")
+            creds["access_token"] = st.text_input("Page Access Token", type="password")
+            creds["ig_user_id"] = st.text_input("Instagram Business Account ID")
         
         if st.button("Authenticate Channel", use_container_width=True):
             if not new_handle:
                 st.error("Please enter a username handle.")
+            elif not all(creds.values()):
+                st.error("Please fill out all API credential fields.")
             else:
                 new_acc = SocialAccount(
                     platform=new_plat.lower(),
                     handle=new_handle,
-                    credentials={"access_token": new_tok},
+                    credentials=creds,
                     rate_limit_remaining=100,
                     rate_limit_reset=datetime.utcnow() + timedelta(days=1)
                 )
