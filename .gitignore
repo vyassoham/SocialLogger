@@ -1,3 +1,10 @@
 .env
-notes.md
-notes.tldr
+.venv/
+__pycache__/
+*.db
+*.pyc
+.pytest_cache/
+campaign_report.csv
+campaign_report.json
+*.csv
+*.json
